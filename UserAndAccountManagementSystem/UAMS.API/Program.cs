@@ -1,3 +1,4 @@
+using UAMS.Infrastructure;
 
 namespace UAMS.API
 {
@@ -10,8 +11,15 @@ namespace UAMS.API
             // Add services to the container.
 
             builder.Services.AddControllers();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+
+            //swagger
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
+
             builder.Services.AddOpenApi();
+
+            //calling the method defined in the Infrastructure project to add services
+            builder.Services.AddInfrastructure(builder.Configuration);
 
             var app = builder.Build();
 
@@ -19,6 +27,8 @@ namespace UAMS.API
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();
+                app.UseSwagger();
+                app.UseSwaggerUI();
             }
 
             app.UseHttpsRedirection();
