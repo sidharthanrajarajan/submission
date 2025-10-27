@@ -11,7 +11,6 @@ Folder Structure:
     ├── UAMS.Application/      → Application Core (CQRS, MediatR, Validation, Mapping)
     ├── UAMS.Domain/           → Enterprise Core (Entities, Value Objects, Interfaces)
     └── UAMS.Infrastructure/   → Data & External Services (EF Core, Repos, Providers)
-    ## 🧩 Entities and Relationships
 
 ### Core Entities
 - **User**
