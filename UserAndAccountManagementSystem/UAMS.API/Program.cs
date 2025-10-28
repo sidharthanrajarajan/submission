@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Cryptography;
 using UAMS.Infrastructure;
 
 namespace UAMS.API
@@ -9,21 +12,52 @@ namespace UAMS.API
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-
             builder.Services.AddControllers();
 
-            //swagger
+            // Swagger
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-
             builder.Services.AddOpenApi();
 
-            //calling the method defined in the Infrastructure project to add services
+            // Infrastructure setup (DbContext, Identity, JwtTokenService)
             builder.Services.AddInfrastructure(builder.Configuration);
+
+            var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+            var publicKeyPath = jwtSettings["PublicKeyPath"];
+
+            if (string.IsNullOrEmpty(publicKeyPath) || !File.Exists(publicKeyPath))
+                throw new FileNotFoundException("Public key file not found at path: " + publicKeyPath);
+
+            using var rsa = RSA.Create();
+            rsa.ImportFromPem(File.ReadAllText(publicKeyPath));
+
+            var rsaSecurityKey = new RsaSecurityKey(rsa);
+
+            builder.Services
+                .AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(options =>
+                {
+                    options.RequireHttpsMetadata = false;
+                    options.SaveToken = true;
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = jwtSettings["Issuer"],
+                        ValidAudience = jwtSettings["Audience"],
+                        IssuerSigningKey = rsaSecurityKey
+                    };
+                });
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            // Configure HTTP pipeline
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();
@@ -33,8 +67,8 @@ namespace UAMS.API
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
-
 
             app.MapControllers();
 
