@@ -15,10 +15,16 @@ namespace UAMS.Infrastructure
             var connectionString = configuration.GetConnectionString("DatabaseConnectionString");
 
             services.AddDbContext<UamsDbContext>(options =>
-                options.UseSqlServer(connectionString));
+                options.UseSqlServer(connectionString, sqlOptions =>
+                {
+                    sqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", "training");
+                }));
 
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(connectionString));
+                options.UseSqlServer(connectionString, sqlOptions =>
+                {
+                    sqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", "training");
+                }));
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
