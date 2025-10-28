@@ -1,119 +1,152 @@
-CREATE TABLE Roles (
-    Id INT IDENTITY(1,1) PRIMARY KEY,
-    Name NVARCHAR(100) NOT NULL UNIQUE,
-    Description NVARCHAR(255),
-    CreatedAt DATETIME2 DEFAULT SYSUTCDATETIME(),
-    UpdatedAt DATETIME2 NULL
+CREATE TABLE [training].[Roles] (
+    [Id] INT IDENTITY(1,1) NOT NULL,
+    [Name] NVARCHAR(100) NOT NULL,
+    [Description] NVARCHAR(MAX) NOT NULL,
+    [CreatedOn] DATETIME2 NOT NULL,
+    [CreatedBy] NVARCHAR(MAX) NOT NULL,
+    [UpdatedOn] DATETIME2 NULL,
+    [UpdatedBy] NVARCHAR(MAX) NULL,
+    [IsDeleted] BIT NOT NULL,
+    CONSTRAINT [PK_Roles] PRIMARY KEY CLUSTERED ([Id] ASC)
 );
+GO
 
-CREATE TABLE Permissions (
-    Id INT IDENTITY(1,1) PRIMARY KEY,
-    Name NVARCHAR(150) NOT NULL UNIQUE,
-    Description NVARCHAR(255),
-    CreatedAt DATETIME2 DEFAULT SYSUTCDATETIME(),
-    UpdatedAt DATETIME2 NULL
+CREATE TABLE [training].[Permissions] (
+    [Id] INT IDENTITY(1,1) NOT NULL,
+    [Name] NVARCHAR(100) NOT NULL,
+    [Description] NVARCHAR(MAX) NOT NULL,
+    [CreatedOn] DATETIME2 NOT NULL,
+    [CreatedBy] NVARCHAR(MAX) NOT NULL,
+    [UpdatedOn] DATETIME2 NULL,
+    [UpdatedBy] NVARCHAR(MAX) NULL,
+    [IsDeleted] BIT NOT NULL,
+    CONSTRAINT [PK_Permissions] PRIMARY KEY CLUSTERED ([Id] ASC)
 );
+GO
 
-CREATE TABLE RolePermissions (
-    Id INT IDENTITY(1,1) PRIMARY KEY,
-    RoleId INT NOT NULL,
-    PermissionId INT NOT NULL,
-    FOREIGN KEY (RoleId) REFERENCES Roles(Id),
-    FOREIGN KEY (PermissionId) REFERENCES Permissions(Id)
+CREATE TABLE [training].[RolePermissions] (
+    [Id] INT IDENTITY(1,1) NOT NULL,
+    [RoleId] INT NOT NULL,
+    [PermissionId] INT NOT NULL,
+    [CreatedOn] DATETIME2 NOT NULL,
+    [CreatedBy] NVARCHAR(MAX) NOT NULL,
+    [UpdatedOn] DATETIME2 NULL,
+    [UpdatedBy] NVARCHAR(MAX) NULL,
+    [IsDeleted] BIT NOT NULL,
+    CONSTRAINT [PK_RolePermissions] PRIMARY KEY CLUSTERED ([Id] ASC),
+    CONSTRAINT [FK_RolePermissions_Roles] FOREIGN KEY ([RoleId]) REFERENCES [training].[Roles]([Id]) ON DELETE CASCADE,
+    CONSTRAINT [FK_RolePermissions_Permissions] FOREIGN KEY ([PermissionId]) REFERENCES [training].[Permissions]([Id]) ON DELETE CASCADE
 );
+GO
 
-CREATE TABLE Users (
-    Id INT IDENTITY(1,1) PRIMARY KEY,
-    Username NVARCHAR(100) NOT NULL UNIQUE,
-    PasswordHash NVARCHAR(500) NOT NULL,
-    Email NVARCHAR(255) NOT NULL UNIQUE,
-    FullName NVARCHAR(255),
-    IsActive BIT DEFAULT 1,
-    CreatedAt DATETIME2 DEFAULT SYSUTCDATETIME(),
-    UpdatedAt DATETIME2 NULL
+CREATE TABLE [training].[Users] (
+    [Id] INT IDENTITY(1,1) NOT NULL,
+    [Email] NVARCHAR(100) NOT NULL,
+    [PasswordHash] NVARCHAR(MAX) NOT NULL,
+    [UserType] NVARCHAR(50) NOT NULL,
+    [PhoneNumber] NVARCHAR(20) NOT NULL,
+    [IsActive] BIT NOT NULL,
+    [CreatedOn] DATETIME2 NOT NULL,
+    [CreatedBy] NVARCHAR(MAX) NOT NULL,
+    [UpdatedOn] DATETIME2 NULL,
+    [UpdatedBy] NVARCHAR(MAX) NULL,
+    [IsDeleted] BIT NOT NULL,
+    [FirstName] NVARCHAR(100) NOT NULL,
+    [MiddleName] NVARCHAR(100) NULL,
+    [LastName] NVARCHAR(100) NOT NULL,
+    CONSTRAINT [PK_Users] PRIMARY KEY CLUSTERED ([Id] ASC)
 );
+GO
 
-CREATE TABLE UserRoles (
-    Id INT IDENTITY(1,1) PRIMARY KEY,
-    UserId INT NOT NULL,
-    RoleId INT NOT NULL,
-    FOREIGN KEY (UserId) REFERENCES Users(Id),
-    FOREIGN KEY (RoleId) REFERENCES Roles(Id)
+CREATE TABLE [training].[UserRoles] (
+    [Id] INT IDENTITY(1,1) NOT NULL,
+    [UserId] INT NOT NULL,
+    [RoleId] INT NOT NULL,
+    [CreatedOn] DATETIME2 NOT NULL,
+    [CreatedBy] NVARCHAR(MAX) NOT NULL,
+    [UpdatedOn] DATETIME2 NULL,
+    [UpdatedBy] NVARCHAR(MAX) NULL,
+    [IsDeleted] BIT NOT NULL,
+    CONSTRAINT [PK_UserRoles] PRIMARY KEY CLUSTERED ([Id] ASC),
+    CONSTRAINT [FK_UserRoles_Users] FOREIGN KEY ([UserId]) REFERENCES [training].[Users]([Id]) ON DELETE CASCADE,
+    CONSTRAINT [FK_UserRoles_Roles] FOREIGN KEY ([RoleId]) REFERENCES [training].[Roles]([Id]) ON DELETE CASCADE
 );
+GO
 
-CREATE TABLE RefreshTokens (
-    Id INT IDENTITY(1,1) PRIMARY KEY,
-    UserId INT NOT NULL,
-    TokenHash NVARCHAR(500) NOT NULL,
-    ExpiresAt DATETIME2 NOT NULL,
-    IsRevoked BIT DEFAULT 0,
-    CreatedAt DATETIME2 DEFAULT SYSUTCDATETIME(),
-    FOREIGN KEY (UserId) REFERENCES Users(Id)
+CREATE TABLE [training].[Banks] (
+    [Id] INT IDENTITY(1,1) NOT NULL,
+    [Name] NVARCHAR(150) NOT NULL,
+    [Code] NVARCHAR(20) NOT NULL,
+    [HeadOfficeAddress] NVARCHAR(MAX) NOT NULL,
+    [ContactNumber] NVARCHAR(MAX) NOT NULL,
+    [CreatedOn] DATETIME2 NOT NULL,
+    [CreatedBy] NVARCHAR(MAX) NOT NULL,
+    [UpdatedOn] DATETIME2 NULL,
+    [UpdatedBy] NVARCHAR(MAX) NULL,
+    [IsDeleted] BIT NOT NULL,
+    CONSTRAINT [PK_Banks] PRIMARY KEY CLUSTERED ([Id] ASC)
 );
+GO
 
-CREATE TABLE Banks (
-    Id INT IDENTITY(1,1) PRIMARY KEY,
-    Name NVARCHAR(255) NOT NULL,
-    Code NVARCHAR(50) UNIQUE NOT NULL,
-    CreatedAt DATETIME2 DEFAULT SYSUTCDATETIME(),
-    UpdatedAt DATETIME2 NULL
+CREATE TABLE [training].[Branches] (
+    [Id] INT IDENTITY(1,1) NOT NULL,
+    [BankId] INT NOT NULL,
+    [Name] NVARCHAR(150) NOT NULL,
+    [BranchCode] NVARCHAR(20) NOT NULL,
+    [Address] NVARCHAR(MAX) NOT NULL,
+    [IFSCCode] NVARCHAR(20) NOT NULL,
+    [ContactNumber] NVARCHAR(MAX) NOT NULL,
+    [CreatedOn] DATETIME2 NOT NULL,
+    [CreatedBy] NVARCHAR(MAX) NOT NULL,
+    [UpdatedOn] DATETIME2 NULL,
+    [UpdatedBy] NVARCHAR(MAX) NULL,
+    [IsDeleted] BIT NOT NULL,
+    CONSTRAINT [PK_Branches] PRIMARY KEY CLUSTERED ([Id] ASC),
+    CONSTRAINT [FK_Branches_Banks] FOREIGN KEY ([BankId]) REFERENCES [training].[Banks]([Id]) ON DELETE CASCADE
 );
+GO
 
-CREATE TABLE Branches (
-    Id INT IDENTITY(1,1) PRIMARY KEY,
-    BankId INT NOT NULL,
-    Name NVARCHAR(255) NOT NULL,
-    Code NVARCHAR(50) UNIQUE NOT NULL,
-    Address NVARCHAR(255),
-    CreatedAt DATETIME2 DEFAULT SYSUTCDATETIME(),
-    UpdatedAt DATETIME2 NULL,
-    FOREIGN KEY (BankId) REFERENCES Banks(Id)
+CREATE TABLE [training].[Accounts] (
+    [Id] INT IDENTITY(1,1) NOT NULL,
+    [UserId] INT NOT NULL,
+    [BranchId] INT NOT NULL,
+    [PowerOfAttorneyUserId] INT NULL,
+    [AccountNumber] NVARCHAR(30) NOT NULL,
+    [AccountType] NVARCHAR(50) NOT NULL,
+    [Currency] NVARCHAR(10) NOT NULL,
+    [Balance] DECIMAL(18, 2) NOT NULL,
+    [IsMinor] BIT NOT NULL,
+    [IsActive] BIT NOT NULL,
+    [CreatedOn] DATETIME2 NOT NULL,
+    [CreatedBy] NVARCHAR(MAX) NOT NULL,
+    [UpdatedOn] DATETIME2 NULL,
+    [UpdatedBy] NVARCHAR(MAX) NULL,
+    [IsDeleted] BIT NOT NULL,
+    CONSTRAINT [PK_Accounts] PRIMARY KEY CLUSTERED ([Id] ASC),
+    CONSTRAINT [FK_Accounts_Users] FOREIGN KEY ([UserId]) REFERENCES [training].[Users]([Id]) ON DELETE NO ACTION,
+    CONSTRAINT [FK_Accounts_Branches] FOREIGN KEY ([BranchId]) REFERENCES [training].[Branches]([Id]) ON DELETE NO ACTION,
+    CONSTRAINT [FK_Accounts_PowerOfAttorneyUser] FOREIGN KEY ([PowerOfAttorneyUserId]) REFERENCES [training].[Users]([Id]) ON DELETE NO ACTION
 );
+GO
 
-CREATE TABLE Accounts (
-    Id INT IDENTITY(1,1) PRIMARY KEY,
-    UserId INT NOT NULL,
-    BankId INT NOT NULL,
-    BranchId INT NULL,
-    AccountNumber NVARCHAR(50) UNIQUE NOT NULL,
-    AccountType NVARCHAR(50) NOT NULL,
-    Currency NVARCHAR(10) DEFAULT 'INR',
-    Balance DECIMAL(18,2) DEFAULT 0,
-    IsMinor BIT DEFAULT 0,
-    IsPOA BIT DEFAULT 0,
-    CreatedAt DATETIME2 DEFAULT SYSUTCDATETIME(),
-    UpdatedAt DATETIME2 NULL,
-    FOREIGN KEY (UserId) REFERENCES Users(Id),
-    FOREIGN KEY (BankId) REFERENCES Banks(Id),
-    FOREIGN KEY (BranchId) REFERENCES Branches(Id)
+CREATE TABLE [training].[Transactions] (
+    [Id] INT IDENTITY(1,1) NOT NULL,
+    [FromAccountId] INT NOT NULL,
+    [ToAccountId] INT NOT NULL,
+    [Amount] DECIMAL(18, 2) NOT NULL,
+    [Currency] NVARCHAR(10) NOT NULL,
+    [TransactionType] NVARCHAR(50) NOT NULL,
+    [Status] NVARCHAR(50) NOT NULL,
+    [TransactionDate] DATETIME2 NOT NULL,
+    [Remarks] NVARCHAR(MAX) NULL,
+    [AccountId] INT NULL,
+    [CreatedOn] DATETIME2 NOT NULL,
+    [CreatedBy] NVARCHAR(MAX) NOT NULL,
+    [UpdatedOn] DATETIME2 NULL,
+    [UpdatedBy] NVARCHAR(MAX) NULL,
+    [IsDeleted] BIT NOT NULL,
+    CONSTRAINT [PK_Transactions] PRIMARY KEY CLUSTERED ([Id] ASC),
+    CONSTRAINT [FK_Transactions_FromAccount] FOREIGN KEY ([FromAccountId]) REFERENCES [training].[Accounts]([Id]) ON DELETE NO ACTION,
+    CONSTRAINT [FK_Transactions_ToAccount] FOREIGN KEY ([ToAccountId]) REFERENCES [training].[Accounts]([Id]) ON DELETE NO ACTION
 );
-
-CREATE TABLE AccountOperations (
-    Id INT IDENTITY(1,1) PRIMARY KEY,
-    AccountId INT NOT NULL,
-    OperationType NVARCHAR(50) NOT NULL,
-    Amount DECIMAL(18,2) NULL,
-    PerformedBy INT NOT NULL,
-    PerformedAt DATETIME2 DEFAULT SYSUTCDATETIME(),
-    FOREIGN KEY (AccountId) REFERENCES Accounts(Id),
-    FOREIGN KEY (PerformedBy) REFERENCES Users(Id)
-);
-
-CREATE TABLE Employees (
-    Id INT IDENTITY(1,1) PRIMARY KEY,
-    UserId INT NOT NULL,
-    BankId INT NOT NULL,
-    BranchId INT NULL,
-    RoleTitle NVARCHAR(100),
-    CreatedAt DATETIME2 DEFAULT SYSUTCDATETIME(),
-    FOREIGN KEY (UserId) REFERENCES Users(Id),
-    FOREIGN KEY (BankId) REFERENCES Banks(Id),
-    FOREIGN KEY (BranchId) REFERENCES Branches(Id)
-);
-
-CREATE INDEX IX_UserRoles_UserId ON UserRoles(UserId);
-CREATE INDEX IX_RefreshTokens_UserId ON RefreshTokens(UserId);
-CREATE INDEX IX_Branches_BankId ON Branches(BankId);
-CREATE INDEX IX_Accounts_UserId ON Accounts(UserId);
-CREATE INDEX IX_Accounts_BankId ON Accounts(BankId);
-CREATE INDEX IX_Employees_BankId ON Employees(BankId);
+GO
