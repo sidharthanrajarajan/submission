@@ -39,7 +39,7 @@ namespace UAMS.Infrastructure.Persistence
             //user
             modelBuilder.Entity<User>(entity =>
             {
-                entity.ToTable("Users", "auth");
+                entity.ToTable("Users", "training");
                 entity.HasKey(u => u.Id);
                 entity.Property(u => u.FullName).IsRequired().HasMaxLength(150);
                 entity.Property(u => u.Email).IsRequired().HasMaxLength(100);
@@ -52,7 +52,7 @@ namespace UAMS.Infrastructure.Persistence
             // Role
             modelBuilder.Entity<Role>(entity =>
             {
-                entity.ToTable("Roles", "auth");
+                entity.ToTable("Roles", "training");
                 entity.HasKey(r => r.Id);
                 entity.Property(r => r.Name).IsRequired().HasMaxLength(100);
                 entity.HasIndex(r => r.Name).IsUnique();
@@ -61,7 +61,7 @@ namespace UAMS.Infrastructure.Persistence
             // Permission
             modelBuilder.Entity<Permission>(entity =>
             {
-                entity.ToTable("Permissions", "auth");
+                entity.ToTable("Permissions", "training");
                 entity.HasKey(p => p.Id);
                 entity.Property(p => p.Name).IsRequired().HasMaxLength(100);
                 entity.HasIndex(p => p.Name).IsUnique();
@@ -70,7 +70,7 @@ namespace UAMS.Infrastructure.Persistence
             // userRole (many-to-many: user and role)
             modelBuilder.Entity<UserRole>(entity =>
             {
-                entity.ToTable("UserRoles", "auth");
+                entity.ToTable("UserRoles", "training");
                 entity.HasKey(ur => ur.Id);
 
                 entity.HasOne(ur => ur.User)
@@ -87,7 +87,7 @@ namespace UAMS.Infrastructure.Persistence
             // RolePermission (many-to-many: role and permission)
             modelBuilder.Entity<RolePermission>(entity =>
             {
-                entity.ToTable("RolePermissions", "auth");
+                entity.ToTable("RolePermissions", "training");
                 entity.HasKey(rp => rp.Id);
 
                 entity.HasOne(rp => rp.Role)
@@ -104,7 +104,7 @@ namespace UAMS.Infrastructure.Persistence
             // Bank
             modelBuilder.Entity<Bank>(entity =>
             {
-                entity.ToTable("Banks", "bank");
+                entity.ToTable("Banks", "training");
                 entity.HasKey(b => b.Id);
                 entity.Property(b => b.Name).IsRequired().HasMaxLength(150);
                 entity.Property(b => b.Code).IsRequired().HasMaxLength(20);
@@ -114,7 +114,7 @@ namespace UAMS.Infrastructure.Persistence
             // Branch
             modelBuilder.Entity<Branch>(entity =>
             {
-                entity.ToTable("Branches", "bank");
+                entity.ToTable("Branches", "training");
                 entity.HasKey(b => b.Id);
                 entity.Property(b => b.Name).IsRequired().HasMaxLength(150);
                 entity.Property(b => b.BranchCode).IsRequired().HasMaxLength(20);
@@ -129,7 +129,7 @@ namespace UAMS.Infrastructure.Persistence
             // Account
             modelBuilder.Entity<Account>(entity =>
             {
-                entity.ToTable("Accounts", "account");
+                entity.ToTable("Accounts", "training");
                 entity.HasKey(a => a.Id);
                 entity.Property(a => a.AccountNumber).IsRequired().HasMaxLength(30);
                 entity.HasIndex(a => a.AccountNumber).IsUnique();
@@ -156,7 +156,7 @@ namespace UAMS.Infrastructure.Persistence
             // Transaction
             modelBuilder.Entity<Transaction>(entity =>
             {
-                entity.ToTable("Transactions", "account");
+                entity.ToTable("Transactions", "training");
                 entity.HasKey(t => t.Id);
                 entity.Property(t => t.Amount).HasPrecision(18, 2);
                 entity.Property(t => t.Currency).IsRequired().HasMaxLength(10);
