@@ -16,15 +16,23 @@ namespace UAMS.Infrastructure.Data
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            base.OnModelCreating(builder);
+            try
+            {
+                base.OnModelCreating(builder);
 
-            builder.HasDefaultSchema("training");
-            // Relationships between ApplicationUser and RefreshTokens
-            builder.Entity<RefreshToken>()
-                .HasOne<ApplicationUser>()
-                .WithMany()
-                .HasForeignKey(rt => rt.ApplicationUserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                builder.HasDefaultSchema("training");
+                // Relationships between ApplicationUser and RefreshTokens
+                builder.Entity<RefreshToken>()
+                    .HasOne<ApplicationUser>()
+                    .WithMany()
+                    .HasForeignKey(rt => rt.ApplicationUserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error during OnModelCreating: {ex.Message}");
+                throw;
+            }
         }
     }
 }

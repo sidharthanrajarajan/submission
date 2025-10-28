@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using UAMS.Infrastructure.Data;
 using UAMS.Infrastructure.Identity;
 using UAMS.Infrastructure.Persistence;
@@ -12,29 +13,57 @@ namespace UAMS.Infrastructure
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
-            var connectionString = configuration.GetConnectionString("DatabaseConnectionString");
+            try
+            {
+                var connectionString = configuration.GetConnectionString("DatabaseConnectionString");
 
-            services.AddDbContext<UamsDbContext>(options =>
-                options.UseSqlServer(connectionString, sqlOptions =>
-                {
-                    sqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", "training");
-                }));
+                if (string.IsNullOrWhiteSpace(connectionString))
+                    throw new InvalidOperationException("Database connection string is not configured properly.");
 
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(connectionString, sqlOptions =>
-                {
-                    sqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", "training");
-                }));
+                // Register DbContexts with custom EF Migrations history table
+                services.AddDbContext<UamsDbContext>(options =>
+                    options.UseSqlServer(connectionString, sqlOptions =>
+                    {
+                        sqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", "training");
+                    }));
 
-            services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
+                services.AddDbContext<ApplicationDbContext>(options =>
+                    options.UseSqlServer(connectionString, sqlOptions =>
+                    {
+                        sqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", "training");
+                    }));
 
-            //register
-            services.AddJwtAuthentication(configuration);
-            services.AddScoped<JwtTokenService>();
+                // Add Identity
+                services.AddIdentity<ApplicationUser, IdentityRole>()
+                    .AddEntityFrameworkStores<ApplicationDbContext>()
+                    .AddDefaultTokenProviders();
 
-            return services;
+                // Register JWT authentication & related services
+                services.AddJwtAuthentication(configuration);
+                services.AddScoped<JwtTokenService>();
+
+                // Log success message
+                var serviceProvider = services.BuildServiceProvider();
+                var logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger("DependencyInjection");
+                logger?.LogInformation("Infrastructure services successfully configured.");
+
+                return services;
+            }
+            catch (InvalidOperationException ex)
+            {
+                Console.Error.WriteLine($"Configuration error: {ex.Message}");
+                throw;
+            }
+            catch (DbUpdateException dbEx)
+            {
+                Console.Error.WriteLine($"Database configuration error: {dbEx.Message}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"An unexpected error occurred during infrastructure setup: {ex.Message}");
+                throw;
+            }
         }
     }
 }

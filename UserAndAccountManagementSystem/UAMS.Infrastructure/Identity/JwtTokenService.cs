@@ -1,71 +1,121 @@
-﻿//let's load private key , generate a JWT using RS256 and try to create a refresh token
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using UAMS.Domain.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 
 namespace UAMS.Infrastructure.Identity
 {
     public class JwtTokenService
     {
         private readonly IConfiguration _configuration;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ILogger<JwtTokenService> _logger;
 
-        public JwtTokenService(IConfiguration configuration)
+        public JwtTokenService(
+            IConfiguration configuration,
+            UserManager<ApplicationUser> userManager,
+            ILogger<JwtTokenService> logger)
         {
             _configuration = configuration;
+            _userManager = userManager;
+            _logger = logger;
         }
 
-        public (string token, DateTime expires) GenerateAccessToken(ApplicationUser user, IList<string> roles)
+        public async Task<(string token, DateTime expires)> GenerateAccessTokenAsync(ApplicationUser user)
         {
-            var jwtSettings = _configuration.GetSection("JwtSettings");
-            var privateKeyPath = jwtSettings["PrivateKeyPath"];
+            try
+            {
+                if (user == null)
+                    throw new ArgumentNullException(nameof(user), "User cannot be null.");
 
-            if (string.IsNullOrWhiteSpace(privateKeyPath))
-                throw new InvalidOperationException("Private key path is missing or not configured in JwtSettings.");
+                var jwtSettings = _configuration.GetSection("JwtSettings");
+                var privateKeyPath = jwtSettings["PrivateKeyPath"];
 
-            if (!File.Exists(privateKeyPath))
-                throw new FileNotFoundException($"Private key file not found at path: {privateKeyPath}");
+                if (string.IsNullOrWhiteSpace(privateKeyPath))
+                    throw new InvalidOperationException("Private key path is missing in JwtSettings.");
 
-            using var rsa = RSA.Create();
-            rsa.ImportFromPem(File.ReadAllText(privateKeyPath));
+                if (!File.Exists(privateKeyPath))
+                    throw new FileNotFoundException($"Private key file not found at: {privateKeyPath}");
 
-            var credentials = new SigningCredentials(
-                new RsaSecurityKey(rsa),
-                SecurityAlgorithms.RsaSha256
-            );
+                var rsa = RSA.Create();
+                var pemContent = File.ReadAllText(privateKeyPath);
+                rsa.ImportFromPem(pemContent);
+                var credentials = new SigningCredentials(new RsaSecurityKey(rsa), SecurityAlgorithms.RsaSha256);
 
-            var claims = new List<Claim>
-    {
-        new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-        new Claim(JwtRegisteredClaimNames.Email, user.Email ?? ""),
-        new Claim(ClaimTypes.Name, user.UserName ?? "")
-    };
+                var roles = await _userManager.GetRolesAsync(user);
+                if (roles == null || roles.Count == 0)
+                    _logger.LogWarning("No roles found for user: {UserName}", user.UserName);
 
-            claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+                var claims = new List<Claim>
+                {
+                    new Claim("sub", user.Id),
+                    new Claim("email", user.Email ?? string.Empty)
+                };
 
-            var token = new JwtSecurityToken(
-                issuer: jwtSettings["Issuer"],
-                audience: jwtSettings["Audience"],
-                claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(double.Parse(jwtSettings["AccessTokenExpirationMinutes"]!)),
-                signingCredentials: credentials
-            );
+                if (roles != null)
+                {
+                    foreach (var role in roles)
+                    {
+                        claims.Add(new Claim("role", role));
+                        _logger.LogInformation("Added role claim: {Role}", role);
+                    }
+                }
 
-            var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
-            return (tokenString, token.ValidTo);
+
+                var expires = DateTime.UtcNow.AddMinutes(
+                    double.TryParse(jwtSettings["AccessTokenExpirationMinutes"], out var minutes) ? minutes : 30);
+
+                var token = new JwtSecurityToken(
+                    issuer: jwtSettings["Issuer"],
+                    audience: jwtSettings["Audience"],
+                    claims: claims,
+                    expires: expires,
+                    signingCredentials: credentials
+                );
+
+                var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+                _logger.LogInformation("JWT generated for user {UserName}, expires {Expiry}", user.UserName, expires);
+
+                return (tokenString, expires);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error generating JWT for user {UserName}", user?.UserName);
+                throw;
+            }
         }
 
         public RefreshToken GenerateRefreshToken(string ipAddress)
         {
-            var randomBytes = RandomNumberGenerator.GetBytes(64);
-            return new RefreshToken
+            try
             {
-                Token = Convert.ToBase64String(randomBytes),
-                Expires = DateTime.UtcNow.AddDays(int.Parse(_configuration["JwtSettings:RefreshTokenExpirationDays"]!)),
-                CreatedByIp = ipAddress
-            };
+                if (string.IsNullOrWhiteSpace(ipAddress))
+                    ipAddress = "Unknown";
+
+                var randomBytes = RandomNumberGenerator.GetBytes(64);
+                var expires = DateTime.UtcNow.AddDays(
+                    int.TryParse(_configuration["JwtSettings:RefreshTokenExpirationDays"], out var days) ? days : 7);
+
+                var refreshToken = new RefreshToken
+                {
+                    Token = Convert.ToBase64String(randomBytes),
+                    Expires = expires,
+                    Created = DateTime.UtcNow,
+                    CreatedByIp = ipAddress
+                };
+
+                _logger.LogInformation("Refresh token generated from IP {IpAddress}, expires {Expiry}", ipAddress, expires);
+                return refreshToken;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error generating refresh token from IP {IpAddress}", ipAddress);
+                throw;
+            }
         }
     }
 }
