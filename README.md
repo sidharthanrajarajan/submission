@@ -88,22 +88,9 @@ Folder Structure:
 - Integrated with `UserManager<ApplicationUser>` for ASP.NET Identity.
 
 ---
-
-4. Exception Handling
-- Implemented **global exception middleware** to handle:
-  - Validation errors
-  - Unauthorized access
-  - Database or application-level exceptions
-- Returns structured JSON error responses:
-  ```json
-  {
-    "statusCode": 400,
-    "message": "Validation failed",
-    "errors": [ ... ]
-  }
-5. Authorization (in progress)
+4. Authorization
 Implemented Role-Based Access Control (RBAC):
 
 Roles and permissions are persisted in the database.
 
-UserSeeder seeds default admin and roles at startup
+UserSeeder seeds default admin, employee and customer with their roles at startup
