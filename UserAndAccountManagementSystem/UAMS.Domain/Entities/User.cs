@@ -3,7 +3,9 @@ namespace UAMS.Domain.Entities
     public class User : BaseEntity
     {
         public int Id { get; private set; }
-        public string FullName { get; private set; } = null!;
+        public string FirstName { get; private set; } = null!;
+        public string? MiddleName { get; private set; }
+        public string LastName { get; private set; } = null!;
         public string Email { get; private set; } = null!;
         public string PasswordHash { get; private set; } = null!;
         public string UserType { get; private set; } = null!;
@@ -16,9 +18,18 @@ namespace UAMS.Domain.Entities
 
         private User() { } // EF Core
 
-        public User(string fullName, string email, string passwordHash, string userType, string phoneNumber)
+        public User(
+            string firstName,
+            string? middleName,
+            string lastName,
+            string email,
+            string passwordHash,
+            string userType,
+            string phoneNumber)
         {
-            FullName = fullName;
+            FirstName = firstName;
+            MiddleName = middleName;
+            LastName = lastName;
             Email = email;
             PasswordHash = passwordHash;
             UserType = userType;
