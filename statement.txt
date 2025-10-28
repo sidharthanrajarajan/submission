@@ -1,0 +1,28 @@
+Problem Statement – User and Account Management System (UAMS)
+
+The goal is to build a system to manage users, their roles, login access, and bank related information like customers, employees, and accounts. 
+
+The system will use JWT authentication with RS256 (private and public keys). It will issue both access and refresh tokens and control access using roles (RBAC).
+
+What the system should do:
+1. Let users register and log in (admins, bank employees, customers).
+2. Use JWT tokens signed with RS256 for login sessions.
+3. Provide refresh tokens along with access tokens.
+4. Control what users can do based on their roles.
+5. Store and manage roles and permissions.
+6. Keep details about banks and their branches.
+7. Link employees and customers to their bank and branch.
+8. Track when data was created or updated.
+9. Support token refresh and revocation.
+10. Keep the database structured and easy to expand.
+
+Other things the system should take care of:
+1. Passwords must be stored securely (hashed maybe Base64?).
+2. Tokens must expire and be verified using the public key.
+3. Each role should only allow specific actions.
+4. The system should be easy to grow (future enchancemeents).
+5. Emails and usernames should be unique.
+6. Database should have proper relationships and foreign keys.
+7. Work as a REST API using ASP.NET Core.
+8. Handle errors and inputs properly.
+9. Use UTC time for all timestamps.

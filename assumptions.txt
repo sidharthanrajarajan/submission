@@ -1,0 +1,18 @@
+Assumptions for UAMS:
+
+1. The system will use JWT authentication with RS256 keys stored securely.
+2. Access tokens will be short-lived (around 15 minutes), and refresh tokens will be longer (around 7 days).
+3. A user can have multiple roles.
+4. Role-based access will control what each user can do; detailed permission settings can be added later.
+5. There are two main user groups — bank staff (employees, admins) and normal users (customers).
+6. A user can hold accounts in multiple banks.
+7. Each bank can have many branches, and each branch belongs to one bank.
+8. Accounts can be Saving, Current, or Term Deposit types.
+9. Some accounts may be operated by minors or by someone holding Power of Attorney (POA).
+10. Accounts can support multiple currencies (for NRI or foreign users).
+11. Admins manage the whole system, while bank users handle their own bank data.
+12. Refresh tokens are stored safely and can be revoked.
+13. SQL Server will be used with EF Core migrations.
+14. All IDs will be stored as GUIDs.
+15. Each record keeps audit info (CreatedAt, UpdatedAt, CreatedBy, UpdatedBy).
+16. Passwords are always hashed before storing.

@@ -1,0 +1,119 @@
+CREATE TABLE Roles (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Name NVARCHAR(100) NOT NULL UNIQUE,
+    Description NVARCHAR(255),
+    CreatedAt DATETIME2 DEFAULT SYSUTCDATETIME(),
+    UpdatedAt DATETIME2 NULL
+);
+
+CREATE TABLE Permissions (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Name NVARCHAR(150) NOT NULL UNIQUE,
+    Description NVARCHAR(255),
+    CreatedAt DATETIME2 DEFAULT SYSUTCDATETIME(),
+    UpdatedAt DATETIME2 NULL
+);
+
+CREATE TABLE RolePermissions (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    RoleId INT NOT NULL,
+    PermissionId INT NOT NULL,
+    FOREIGN KEY (RoleId) REFERENCES Roles(Id),
+    FOREIGN KEY (PermissionId) REFERENCES Permissions(Id)
+);
+
+CREATE TABLE Users (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Username NVARCHAR(100) NOT NULL UNIQUE,
+    PasswordHash NVARCHAR(500) NOT NULL,
+    Email NVARCHAR(255) NOT NULL UNIQUE,
+    FullName NVARCHAR(255),
+    IsActive BIT DEFAULT 1,
+    CreatedAt DATETIME2 DEFAULT SYSUTCDATETIME(),
+    UpdatedAt DATETIME2 NULL
+);
+
+CREATE TABLE UserRoles (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    UserId INT NOT NULL,
+    RoleId INT NOT NULL,
+    FOREIGN KEY (UserId) REFERENCES Users(Id),
+    FOREIGN KEY (RoleId) REFERENCES Roles(Id)
+);
+
+CREATE TABLE RefreshTokens (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    UserId INT NOT NULL,
+    TokenHash NVARCHAR(500) NOT NULL,
+    ExpiresAt DATETIME2 NOT NULL,
+    IsRevoked BIT DEFAULT 0,
+    CreatedAt DATETIME2 DEFAULT SYSUTCDATETIME(),
+    FOREIGN KEY (UserId) REFERENCES Users(Id)
+);
+
+CREATE TABLE Banks (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Name NVARCHAR(255) NOT NULL,
+    Code NVARCHAR(50) UNIQUE NOT NULL,
+    CreatedAt DATETIME2 DEFAULT SYSUTCDATETIME(),
+    UpdatedAt DATETIME2 NULL
+);
+
+CREATE TABLE Branches (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    BankId INT NOT NULL,
+    Name NVARCHAR(255) NOT NULL,
+    Code NVARCHAR(50) UNIQUE NOT NULL,
+    Address NVARCHAR(255),
+    CreatedAt DATETIME2 DEFAULT SYSUTCDATETIME(),
+    UpdatedAt DATETIME2 NULL,
+    FOREIGN KEY (BankId) REFERENCES Banks(Id)
+);
+
+CREATE TABLE Accounts (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    UserId INT NOT NULL,
+    BankId INT NOT NULL,
+    BranchId INT NULL,
+    AccountNumber NVARCHAR(50) UNIQUE NOT NULL,
+    AccountType NVARCHAR(50) NOT NULL,
+    Currency NVARCHAR(10) DEFAULT 'INR',
+    Balance DECIMAL(18,2) DEFAULT 0,
+    IsMinor BIT DEFAULT 0,
+    IsPOA BIT DEFAULT 0,
+    CreatedAt DATETIME2 DEFAULT SYSUTCDATETIME(),
+    UpdatedAt DATETIME2 NULL,
+    FOREIGN KEY (UserId) REFERENCES Users(Id),
+    FOREIGN KEY (BankId) REFERENCES Banks(Id),
+    FOREIGN KEY (BranchId) REFERENCES Branches(Id)
+);
+
+CREATE TABLE AccountOperations (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    AccountId INT NOT NULL,
+    OperationType NVARCHAR(50) NOT NULL,
+    Amount DECIMAL(18,2) NULL,
+    PerformedBy INT NOT NULL,
+    PerformedAt DATETIME2 DEFAULT SYSUTCDATETIME(),
+    FOREIGN KEY (AccountId) REFERENCES Accounts(Id),
+    FOREIGN KEY (PerformedBy) REFERENCES Users(Id)
+);
+
+CREATE TABLE Employees (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    UserId INT NOT NULL,
+    BankId INT NOT NULL,
+    BranchId INT NULL,
+    RoleTitle NVARCHAR(100),
+    CreatedAt DATETIME2 DEFAULT SYSUTCDATETIME(),
+    FOREIGN KEY (UserId) REFERENCES Users(Id),
+    FOREIGN KEY (BankId) REFERENCES Banks(Id),
+    FOREIGN KEY (BranchId) REFERENCES Branches(Id)
+);
+
+CREATE INDEX IX_UserRoles_UserId ON UserRoles(UserId);
+CREATE INDEX IX_RefreshTokens_UserId ON RefreshTokens(UserId);
+CREATE INDEX IX_Branches_BankId ON Branches(BankId);
+CREATE INDEX IX_Accounts_UserId ON Accounts(UserId);
+CREATE INDEX IX_Accounts_BankId ON Accounts(BankId);
+CREATE INDEX IX_Employees_BankId ON Employees(BankId);
