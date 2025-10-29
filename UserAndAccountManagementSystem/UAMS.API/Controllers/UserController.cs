@@ -4,7 +4,7 @@ using System.Security.Claims;
 
 namespace UAMS.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     [Authorize]
     public class UserController : ControllerBase
@@ -18,21 +18,21 @@ namespace UAMS.API.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
-        public IActionResult UpdateUser(Guid id, [FromBody] object userDto)
+        public IActionResult UpdateUser(int id, [FromBody] object userDto)
         {
             return Ok($"User {id} updated successfully.");
         }
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
-        public IActionResult DeleteUser(Guid id)
+        public IActionResult DeleteUser(int id)
         {
             return Ok($" User {id} deleted successfully.");
         }
 
         [HttpGet("{id?}")]
         [Authorize(Roles = "Admin,Employee,Customer")]
-        public IActionResult GetUser(Guid? id = null)
+        public IActionResult GetUser(int? id = null)
         {
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var isAdmin = User.IsInRole("Admin");
@@ -42,7 +42,8 @@ namespace UAMS.API.Controllers
             if (isCustomer)
             {
                 if (id == null || id.ToString() != currentUserId)
-                    return Forbid("You can only access your own account information.");
+                    return StatusCode(StatusCodes.Status403Forbidden,
+                        "You can only access your own account information.");
             }
 
             if (isAdmin || isEmployee)
@@ -50,7 +51,7 @@ namespace UAMS.API.Controllers
                 return Ok("Full user list (Admin/Employee access).");
             }
 
-            return Ok($" User profile for ID {currentUserId}.");
+            return Ok($"User profile for ID {currentUserId}.");
         }
     }
 }

@@ -13,8 +13,9 @@ namespace UAMS.Infrastructure.Identity.Seed
             RoleManager<IdentityRole> roleManager,
             ILogger logger)
         {
-            string[] roles = { "Admin", "Employee", "Customer" };
+            string[] roles = { "Admin", "Employee", "Customer"};
 
+            // Ensure all roles exist
             foreach (var role in roles)
             {
                 if (!await roleManager.RoleExistsAsync(role))
@@ -24,14 +25,14 @@ namespace UAMS.Infrastructure.Identity.Seed
                 }
             }
 
-            // Admin user
-            await EnsureUserAsync(userManager, "admin", "admin@uams.com", "Admin@123", "Admin", logger);
+            await EnsureUserAsync(userManager, "admin", "admin@uams.com", "Admin@123", new[] { "Admin" }, logger);
 
-            // Employee user
-            await EnsureUserAsync(userManager, "employee", "employee@uams.com", "Employee@123", "Employee", logger);
+            await EnsureUserAsync(userManager, "employee", "employee@uams.com", "Employee@123", new[] { "Employee" }, logger);
 
-            // Customer user
-            await EnsureUserAsync(userManager, "customer", "customer@uams.com", "Customer@123", "Customer", logger);
+            await EnsureUserAsync(userManager, "customer", "customer@uams.com", "Customer@123", new[] { "Customer" }, logger);
+
+            await EnsureUserAsync(userManager, "auditor", "auditor@uams.com", "Auditor@123",
+                new[] { "Employee", "Customer" }, logger);
         }
 
         private static async Task EnsureUserAsync(
@@ -39,21 +40,23 @@ namespace UAMS.Infrastructure.Identity.Seed
             string username,
             string email,
             string password,
-            string role,
+            string[] roles,
             ILogger logger)
         {
             var user = await userManager.FindByNameAsync(username);
             if (user != null)
             {
-                logger.LogInformation("User '{User}' already exists. Skipping creation.", username);
+                logger.LogInformation("User '{User}' already exists. Ensuring roles...", username);
 
-                // Ensure user has the role (in case seeding ran before)
-                if (!await userManager.IsInRoleAsync(user, role))
+                // Ensure user has all assigned roles
+                foreach (var role in roles)
                 {
-                    await userManager.AddToRoleAsync(user, role);
-                    logger.LogInformation("Added existing user '{User}' to role '{Role}'.", username, role);
+                    if (!await userManager.IsInRoleAsync(user, role))
+                    {
+                        await userManager.AddToRoleAsync(user, role);
+                        logger.LogInformation("Added existing user '{User}' to role '{Role}'.", username, role);
+                    }
                 }
-
                 return;
             }
 
@@ -73,8 +76,8 @@ namespace UAMS.Infrastructure.Identity.Seed
                 return;
             }
 
-            await userManager.AddToRoleAsync(user, role);
-            logger.LogInformation("User '{User}' created successfully and added to role '{Role}'.", username, role);
+            await userManager.AddToRolesAsync(user, roles);
+            logger.LogInformation("User '{User}' created successfully with roles: {Roles}.", username, string.Join(", ", roles));
         }
     }
 }

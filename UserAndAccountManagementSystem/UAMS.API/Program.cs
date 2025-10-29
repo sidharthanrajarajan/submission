@@ -1,11 +1,10 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Cryptography;
 using UAMS.Infrastructure;
 using UAMS.Infrastructure.Identity;
 using UAMS.Infrastructure.Identity.Seed;
+using UAMS.Domain.Entities;
 
 namespace UAMS.API
 {
@@ -15,10 +14,10 @@ namespace UAMS.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            // Add services to the container
             builder.Services.AddControllers();
 
-            // Swagger
+            // Swagger + JWT
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(options =>
             {
@@ -31,7 +30,7 @@ namespace UAMS.API
                     Scheme = "bearer",
                     BearerFormat = "JWT",
                     In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-                    Description = "Enter 'Bearer' followed by your token.\n\nExample: **Bearer eyJhbGciOi...**"
+                    Description = "Enter your token after bearer.\n\nExample: **Bearer eyJhbGciOi...**"
                 });
 
                 options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
@@ -49,10 +48,7 @@ namespace UAMS.API
                     }
                 });
             });
-            builder.Services.AddSwaggerGen();
-            builder.Services.AddOpenApi();
 
-            // Infrastructure setup (DbContext, Identity, JwtTokenService)
             builder.Services.AddInfrastructure(builder.Configuration);
 
             var jwtSettings = builder.Configuration.GetSection("JwtSettings");
@@ -63,7 +59,6 @@ namespace UAMS.API
 
             using var rsa = RSA.Create();
             rsa.ImportFromPem(File.ReadAllText(publicKeyPath));
-
             var rsaSecurityKey = new RsaSecurityKey(rsa);
 
             var app = builder.Build();
@@ -77,10 +72,8 @@ namespace UAMS.API
                 await UserSeeder.SeedDefaultUsersAsync(userManager, roleManager, logger);
             }
 
-            // Configure HTTP pipeline
             if (app.Environment.IsDevelopment())
             {
-                app.MapOpenApi();
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }

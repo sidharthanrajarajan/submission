@@ -2,8 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using UAMS.API.DTO;
 using UAMS.Infrastructure.Identity;
-using System;
-using System.Threading.Tasks;
 
 namespace UAMS.API.Controllers
 {

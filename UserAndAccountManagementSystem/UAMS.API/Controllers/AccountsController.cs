@@ -4,7 +4,7 @@ using System.Security.Claims;
 
 namespace UAMS.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     [Authorize]
     public class AccountsController : ControllerBase
@@ -18,21 +18,21 @@ namespace UAMS.API.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin,Employee")]
-        public IActionResult UpdateAccount(Guid id, [FromBody] object accountDto)
+        public IActionResult UpdateAccount(int id, [FromBody] object accountDto)
         {
             return Ok($"Account {id} updated successfully (Admin/Employee only).");
         }
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
-        public IActionResult DeleteAccount(Guid id)
+        public IActionResult DeleteAccount(int id)
         {
             return Ok($"Account {id} deleted successfully (Admin only).");
         }
 
         [HttpGet("{id?}")]
         [Authorize(Roles = "Admin,Employee,Customer")]
-        public IActionResult GetAccount(Guid? id = null)
+        public IActionResult GetAccount(int? id = null)
         {
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var isAdmin = User.IsInRole("Admin");
