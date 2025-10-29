@@ -1,0 +1,69 @@
+Solution Structure
+
+UAMS.API → The main web API project.
+
+Controllers – Handle incoming API requests (e.g., AccountsController).
+
+Keys – Folder with RSA public/private key files used for JWT authentication.
+
+Program.cs / Startup.cs – Sets up Identity, JWT authentication, EF Core, and Swagger.
+
+UAMS.Domain → Holds the main business models.
+
+Entities like User, Role, Account, Transaction, etc.
+
+Contains base classes for auditing and soft delete.
+
+UAMS.Application → The middle layer (currently empty).
+
+Used for business logic, commands, queries, DTOs, and validation later.
+
+UAMS.Infrastructure → Handles actual data and technical details.
+
+Data/ → ApplicationDbContext for Identity (user logins, roles).
+
+Persistence/ → UamsDbContext for business data (accounts, transactions).
+
+Identity/ → ApplicationUser, JWT setup, token generation.
+
+Seed/ → Adds default roles and users.
+
+Migrations/ → Database migrations for Identity.
+
+How the Folder Structure Can Be Improved
+
+Application Layer
+
+Add folders for Commands, Queries, DTOs, Interfaces, and Validators.
+
+This will separate business logic from controllers and keep the code organized.
+
+Infrastructure Layer
+
+Group related code more clearly, for example:
+
+Data/ → EF Core contexts and configurations
+
+Identity/ → User, Role, and JWT setup
+
+Services/ → Common utilities like email, logging, and auditing
+
+Migrations/ → Separate folders for each DbContext (Identity and Business)
+
+Domain Layer
+
+Keep only business entities, enums, and domain rules here.
+
+Avoid putting EF Core or external dependencies in this layer.
+
+API Layer
+
+Use folders like Controllers/, Models/, Filters/, and Middlewares/.
+
+Keep it focused on handling requests and responses.
+
+Solution Level
+
+Consider adding a Tests/ project for unit and integration tests.
+
+Optionally add a Docs/ folder for documentation or diagrams.
