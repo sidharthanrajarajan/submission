@@ -1,0 +1,354 @@
+{
+	"info": {
+		"_postman_id": "3f39eff8-0aeb-48ac-9b8b-11a800a32161",
+		"name": "JWT and User",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "49632095",
+		"_collection_link": "https://sidharthanrajarajan-6973905.postman.co/workspace/Sidharthan-Rajarajan's-Workspac~9b22c93d-2b19-4b62-858d-f762f9f1fcf1/collection/49632095-3f39eff8-0aeb-48ac-9b8b-11a800a32161?action=share&source=collection_link&creator=49632095"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "auditor",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let json = pm.response.json();\r",
+									"pm.environment.set(\"auditorToken\", json.token);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auditorToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"username\": \"auditor\",\r\n  \"password\": \"Auditor@123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/Auth/Login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"Auth",
+								"Login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "employee",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let json = pm.response.json();\r",
+									"pm.environment.set(\"employeeToken\", json.token);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{employeeToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"username\": \"employee\",\r\n  \"password\": \"Employee@123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/Auth/Login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"Auth",
+								"Login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let json = pm.response.json();\r",
+									"pm.environment.set(\"adminToken\", json.token);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"username\": \"admin\",\r\n  \"password\": \"Admin@123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/Auth/Login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"Auth",
+								"Login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let json = pm.response.json();\r",
+									"pm.environment.set(\"userToken\", json.token);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"username\": \"customer\",\r\n  \"password\": \"Customer@123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/Auth/Login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"Auth",
+								"Login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "GetUser",
+			"item": [
+				{
+					"name": "auditor",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/User/10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"User",
+								"10"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "employee",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{employeeToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/User/10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"User",
+								"10"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "customer",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{customerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/User/10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"User",
+								"10"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "admin",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/User/10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"User",
+								"10"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "",
+			"type": "default"
+		},
+		{
+			"key": "userToken",
+			"value": "",
+			"type": "default"
+		},
+		{
+			"key": "adminToken",
+			"value": "",
+			"type": "default"
+		},
+		{
+			"key": "auditorToken",
+			"value": "",
+			"type": "default"
+		},
+		{
+			"key": "employeeToken",
+			"value": "",
+			"type": "default"
+		}
+	]
+}
