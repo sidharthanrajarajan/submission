@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using UAMS.Infrastructure.Identity;
+
 
 namespace UAMS.API.Controllers
 {
@@ -9,6 +12,13 @@ namespace UAMS.API.Controllers
     [Authorize]
     public class UserController : ControllerBase
     {
+        private readonly UserManager<ApplicationUser> _userManager;
+
+        public UserController(UserManager<ApplicationUser> userManager)
+        {
+            _userManager = userManager;
+        }
+
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public IActionResult CreateUser([FromBody] object userDto)
@@ -52,6 +62,27 @@ namespace UAMS.API.Controllers
             }
 
             return Ok($"User profile for ID {currentUserId}.");
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ListUsersWithRoles()
+        {
+            var users = _userManager.Users.ToList();
+            var userRolesList = new List<object>();
+
+            foreach (var user in users)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                userRolesList.Add(new
+                {
+                    user.Id,
+                    user.UserName,
+                    Roles = roles
+                });
+            }
+
+            return Ok(userRolesList);
         }
     }
 }
